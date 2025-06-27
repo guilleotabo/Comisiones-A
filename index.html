@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Comisiones Comerciales - SERSA SAECA</title>
+    
+<link rel="stylesheet" href="comisiones.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Panel Izquierdo -->
+        <div class="left-panel">
+            <div class="header">
+                <h1>💰 Sistema de Comisiones Comerciales</h1>
+                <span id="saveIndicator"></span>
+                <div class="header-buttons">
+                    <button class="header-btn" onclick="limpiarTodo()">🗑️ Limpiar</button>
+                    <button class="header-btn" onclick="descargarPDF()">📄 PDF</button>
+                    <button class="header-btn" id="toggleSidebarBtn" onclick="toggleSidebar()">⬅️ Ocultar</button>
+                </div>
+            </div>
+            
+            <div class="input-section">
+                <!-- Historial -->
+                <div class="section-divider">═══ HISTORIAL ═══</div>
+                
+                <div class="input-group">
+                    <label>Nivel mes anterior</label>
+                    <select class="input-field" id="nivelAnterior" onchange="updateCalculations()">
+                        <option value="0">Capilla</option>
+                        <option value="1">Junior</option>
+                        <option value="2" selected>Senior A</option>
+                        <option value="3">Senior B</option>
+                        <option value="4">Máster</option>
+                        <option value="5">Genio</option>
+                    </select>
+                    <div class="help-text">Para cálculo de carrera (menor de 2 meses)</div>
+                </div>
+                
+                <!-- Volumen -->
+                <div class="section-divider">═══ VOLUMEN ═══</div>
+                
+                <div class="input-group">
+                    <label>Monto Interno <span class="req">*</span></label>
+                    <input type="text" class="input-field required" id="montoInterno" 
+                           placeholder="Ej: 950.000.000" 
+                           onkeyup="formatAndCalculate(this)"
+                           onfocus="removeFormat(this)"
+                           onblur="applyFormat(this)">
+                    <div class="status-text">
+                        <span id="internoStatus"></span>
+                        <span id="montoLlave" class="llave"></span>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Monto Externo/Referenciado</label>
+                    <input type="text" class="input-field" id="montoExterno"
+                           placeholder="Ej: 80.000.000"
+                           onkeyup="formatAndCalculate(this)"
+                           onfocus="removeFormat(this)"
+                           onblur="applyFormat(this)">
+                    <div class="status-text">
+                        <span id="externoLlave" class="llave"></span>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Recuperados +3 meses</label>
+                    <input type="text" class="input-field" id="montoRecuperado"
+                           placeholder="Ej: 60.000.000"
+                           onkeyup="formatAndCalculate(this)"
+                           onfocus="removeFormat(this)"
+                           onblur="applyFormat(this)">
+                    <div class="status-text">
+                        <span id="recuperadoLlave" class="llave"></span>
+                    </div>
+                    <div class="help-text">Clientes recuperados después de 3 meses</div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Cantidad Desembolsos <span class="req">*</span></label>
+                    <input type="text" class="input-field required" id="cantidadDesembolsos" 
+                           placeholder="Ej: 10"
+                           onkeyup="formatAndCalculate(this)">
+                    <div class="status-text">
+                        <span id="cantidadStatus"></span>
+                    </div>
+                </div>
+                
+                <!-- Llave Semanal -->
+                <div class="section-divider">═══ LLAVE SEMANAL ═══</div>
+                
+                <div class="input-group">
+                    <label>Desembolsos semanales mínimos <span class="req">*</span> <span class="tooltip" data-tip="Cantidad de desembolsos en tu peor semana">ⓘ</span></label>
+                    <input type="text" class="input-field required filled" id="menorSemana" value="2"
+                           placeholder="Ej: 2"
+                           onkeyup="formatAndCalculate(this)">
+                    <div class="llave-info" id="llaveInfo">
+                        <div><strong>LLAVE HABILITADA:</strong></div>
+                        <div class="llave-rules">
+                            <div>✅ 2/sem → habilita premio cantidad completo</div>
+                            <div>❌ Menos de 2/sem → sin premio cantidad</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Calidad -->
+                <div class="section-divider">═══ CALIDAD ═══</div>
+                
+                <div class="input-group">
+                    <label>Conversión % <span class="req">*</span></label>
+                    <input type="text" class="input-field required" id="conversion"
+                           placeholder="Ej: 7" maxlength="5" value="8"
+                           onkeyup="formatAndCalculate(this)">
+                </div>
+                
+                <div class="input-group">
+                    <label>Empatía/Mystery % <span class="req">*</span></label>
+                    <input type="text" class="input-field required" id="empatia"
+                           placeholder="Ej: 92" maxlength="3" value="96"
+                           onkeyup="formatAndCalculate(this)">
+                </div>
+                
+                <div class="input-group">
+                    <label>Proceso/CRM % <span class="req">*</span></label>
+                    <input type="text" class="input-field required" id="proceso"
+                           placeholder="Ej: 85" maxlength="3" value="95"
+                           onkeyup="formatAndCalculate(this)">
+                </div>
+
+                <div class="input-group">
+                    <label>Mora % <span class="req">*</span></label>
+                    <input type="text" class="input-field required" id="mora"
+                           placeholder="Ej: 2" maxlength="3" value="2"
+                           onkeyup="formatAndCalculate(this)">
+                </div>
+                
+                <!-- Otros -->
+                <div class="section-divider">═══ OTROS ═══</div>
+                
+                <div class="input-group">
+                    <label>Menor nivel del equipo</label>
+                    <select class="input-field" id="nivelEquipo" onchange="updateCalculations()">
+                        <option value="0">Capilla</option>
+                        <option value="1">Junior</option>
+                        <option value="2" selected>Senior A</option>
+                        <option value="3">Senior B</option>
+                        <option value="4">Máster</option>
+                        <option value="5">Genio</option>
+                    </select>
+                    <div class="help-text">Para premio equipo (desde Senior A)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botón para abrir sidebar -->
+        <button id="openSidebarBtn" class="open-sidebar-btn" onclick="toggleSidebar()">➡️ Mostrar</button>
+
+        <!-- Panel Derecho -->
+        <div class="right-panel">
+            <div class="top-stats">
+                <div class="stat">
+                    <span class="stat-label">Tu Nivel:</span>
+                    <span class="stat-value" id="statNivel">Senior A</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Subtotal:</span>
+                    <span class="stat-value" id="statSubtotal">0 Gs</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Multiplicador:</span>
+                    <span class="stat-value" id="statMulti">0%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Comisión:</span>
+                    <span class="stat-value" style="color: #2E7D32;" id="statComision">0 Gs</span>
+                </div>
+            </div>
+            
+            <div class="results-container">
+                <!-- Fila 1: Monto Interno y Externo -->
+                <div class="card">
+                    <div class="card-title">📊 MONTO INTERNO - Meta desembolso | Premio comisión</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="barraInterno"></div>
+                    </div>
+                    <div class="progress-info" id="infoInterno"></div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">💎 MONTO EXTERNO/REFERENCIADO - Meta | Premio</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="barraExterno"></div>
+                    </div>
+                    <div class="progress-info" id="infoExterno"></div>
+                </div>
+                
+                <!-- Fila 2: Cantidad y Recuperados -->
+                <div class="card">
+                    <div class="card-title">🎯 CANTIDAD DESEMBOLSOS - Meta | Premio | Llave</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="barraCantidad"></div>
+                    </div>
+                    <div class="progress-info" id="infoCantidad"></div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">🔄 RECUPERADOS +3 MESES - Meta | Premio</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="barraRecuperado"></div>
+                    </div>
+                    <div class="progress-info" id="infoRecuperado"></div>
+                </div>
+                
+                <!-- Fila 3: Carrera y Equipo -->
+                <div class="card">
+                    <div class="card-title">📈 PREMIO CARRERA - Según menor nivel últimos 2 meses</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="barraCarrera"></div>
+                    </div>
+                    <div class="progress-info" id="infoCarrera"></div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">👥 PREMIO EQUIPO - Según menor nivel del equipo</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="barraEquipo"></div>
+                    </div>
+                    <div class="progress-info" id="infoEquipo"></div>
+                    <div id="equipoRequisitos" style="margin-top: 8px; padding: 8px; background: #FFF3E0; border-radius: 4px; font-size: 11px; color: #E65100;">
+                        ⚠️ Necesitas estar en Senior A+ para cobrar premio equipo
+                    </div>
+                </div>
+                
+                <!-- Barra de Subtotal -->
+                <div class="card full-width">
+                    <div class="card-title">💰 SUBTOTAL ACUMULADO (sin multiplicadores)</div>
+                    <div class="subtotal-bar">
+                        <div class="subtotal-fill" id="subtotalFill"></div>
+                    </div>
+                    <div class="subtotal-text">
+                        Subtotal: <strong id="subtotalMonto">0 Gs</strong> de <strong>14.000.000 Gs</strong>
+                    </div>
+                </div>
+                
+                <!-- Multiplicadores -->
+                <div class="card full-width">
+                    <div class="card-title">⭐ MULTIPLICADORES (SE APLICAN EN CADENA)</div>
+                    <div class="multiplier-tables" id="multiplicadorTables"></div>
+                    <div class="multiplier-calc" id="multiplicadorCalc">
+                        Cálculo: - × - × - = 0%
+                    </div>
+                </div>
+                
+                <!-- Cálculo de Comisión y Sugerencias lado a lado -->
+                <div class="card full-width">
+                    <div class="card-title">💰 CÁLCULO DE COMISIÓN Y SUGERENCIAS</div>
+                    <div class="commission-calculation">
+                        <div class="calc-section">
+                            <div class="calc-row">
+                                <span>Base fija:</span>
+                                <span id="calcBase">0 Gs</span>
+                            </div>
+                            <div class="calc-row">
+                                <span>Carrera:</span>
+                                <span id="calcCarrera">0 Gs</span>
+                            </div>
+                            <div class="calc-row">
+                                <span>Monto Interno:</span>
+                                <span id="calcInterno">0 Gs</span>
+                            </div>
+                            <div class="calc-row">
+                                <span>Monto Ext/Ref:</span>
+                                <span id="calcExterno">0 Gs</span>
+                            </div>
+                            <div class="calc-row">
+                                <span>Recuperados:</span>
+                                <span id="calcRecuperado">0 Gs</span>
+                            </div>
+                            <div class="calc-row">
+                                <span>Cantidad <span id="cantidadLlaveInfo"></span>:</span>
+                                <span id="calcCantidad">0 Gs</span>
+                            </div>
+                            <div class="calc-row">
+                                <span>Equipo:</span>
+                                <span id="calcEquipo">0 Gs</span>
+                            </div>
+                            <div class="calc-divider"></div>
+                            
+                            <div class="calc-row">
+                                <span>Subtotal:</span>
+                                <span id="calcSubtotal">0 Gs</span>
+                            </div>
+                            <div class="calc-row">
+                                <span>× Multi:</span>
+                                <span id="calcMultiplicador">0%</span>
+                            </div>
+                            
+                            <div class="calc-total">
+                                <div class="calc-total-label">TOTAL COMISIÓN</div>
+                                <div class="calc-total-value" id="totalComision">0 Gs</div>
+                            </div>
+                        </div>
+                        
+                        <div class="suggestions-section">
+                            <div class="card-title" style="margin-top: 0;">💡 SUGERENCIAS PERSONALIZADAS</div>
+                            <div id="sugerencias"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Información de carrera -->
+                <div class="card full-width">
+                    <div class="info-section">
+                        <h4>📖 CÓMO SE DEFINE TU CARRERA</h4>
+                        Tu nivel de carrera se determina por el <strong>MENOR</strong> nivel alcanzado entre:
+                        <br>• Monto Interno + Monto Externo + Recuperados + Cantidad Desembolsos
+                        <br>• Se considera el menor de los últimos 2 meses para estabilidad
+                        <br>• NO se consideran: Premio Equipo ni penalizaciones
+                    </div>
+                    
+                    <div class="info-section quick-guide">
+                        <h4>📚 GUÍA RÁPIDA</h4>
+                        • <strong>Llaves:</strong> Sin 6 desemb. no hay premio interno | 2/sem habilita premio cantidad
+                        <br>• <strong>Multiplicadores:</strong> Se aplican en cadena (Conv × Emp × Proc)
+                        <br>• <strong>Base fija:</strong> Siempre 3M, nunca se multiplica
+                        <br>• <strong>Equipo:</strong> Premio según menor nivel del equipo (desde Senior A)
+                        <br>• <strong>Meta vs Premio:</strong> Meta = monto a desembolsar | Premio = comisión que ganás
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+<script src="app.js"></script>
+</body>
+</html>

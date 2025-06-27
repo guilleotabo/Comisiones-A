@@ -1,0 +1,26 @@
+{
+  "next_id": 4,
+  "tasks": [
+    {
+      "id": 1,
+      "description": "Move existing static files into a new public directory with css and js subfolders.",
+      "files": ["index.html", "comisiones.css", "app.js", "public/index.html", "public/css/comisiones.css", "public/js/app.js"],
+      "current_status": "todo",
+      "needs_preanalysis": false
+    },
+    {
+      "id": 2,
+      "description": "Update paths in public/index.html so link and script tags point to css/comisiones.css and js/app.js.",
+      "files": ["public/index.html"],
+      "current_status": "todo",
+      "needs_preanalysis": false
+    },
+    {
+      "id": 3,
+      "description": "Document the new folder layout in README and mention opening public/index.html to use the app.",
+      "files": ["README.md"],
+      "current_status": "todo",
+      "needs_preanalysis": false
+    }
+  ]
+}
